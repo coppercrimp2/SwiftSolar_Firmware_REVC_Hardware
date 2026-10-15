@@ -180,34 +180,6 @@ void RTC_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles EXTI Line5 interrupt.
-  */
-void EXTI5_IRQHandler(void)
-{
-  /* USER CODE BEGIN EXTI5_IRQn 0 */
-
-  /* USER CODE END EXTI5_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(SDCARD_DETECT_Pin);
-  /* USER CODE BEGIN EXTI5_IRQn 1 */
-
-  /* USER CODE END EXTI5_IRQn 1 */
-}
-
-/**
-  * @brief This function handles EXTI Line7 interrupt.
-  */
-void EXTI7_IRQHandler(void)
-{
-  /* USER CODE BEGIN EXTI7_IRQn 0 */
-
-  /* USER CODE END EXTI7_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(HallSensor_Pin);
-  /* USER CODE BEGIN EXTI7_IRQn 1 */
-
-  /* USER CODE END EXTI7_IRQn 1 */
-}
-
-/**
   * @brief This function handles EXTI Line9 interrupt.
   */
 void EXTI9_IRQHandler(void)

@@ -94,7 +94,13 @@ const osThreadAttr_t ScanButtons_attributes = {
   .stack_size = 256 * 4
 };
 /* USER CODE END Variables */
-
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4
+};
 /* Definitions for Record */
 osThreadId_t RecordHandle;
 const osThreadAttr_t Record_attributes = {
@@ -128,14 +134,21 @@ osThreadId_t HallEffectSensorHandle;
 const osThreadAttr_t HallEffectSensor_attributes = {
   .name = "HallEffectSensor",
   .priority = (osPriority_t) osPriorityLow1,
-  .stack_size = 500 * 4
+  .stack_size = 128 * 4
 };
 /* Definitions for Initialize */
 osThreadId_t InitializeHandle;
 const osThreadAttr_t Initialize_attributes = {
   .name = "Initialize",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 600 * 4
+  .stack_size = 1000 * 4
+};
+/* Definitions for ScanButtonsTask */
+osThreadId_t ScanButtonsTaskHandle;
+const osThreadAttr_t ScanButtonsTask_attributes = {
+  .name = "ScanButtonsTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
 };
 /* Definitions for QueueDisplayMessage */
 osMessageQueueId_t QueueDisplayMessageHandle;
@@ -266,7 +279,7 @@ void MX_FREERTOS_Init(void) {
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
   /* creation of defaultTask */
-  //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of Record */
   RecordHandle = osThreadNew(RecordTask, NULL, &Record_attributes);
@@ -286,6 +299,8 @@ void MX_FREERTOS_Init(void) {
   /* creation of Initialize */
   InitializeHandle = osThreadNew(InitializeTask, NULL, &Initialize_attributes);
 
+  /* creation of ScanButtonsTask */
+  ScanButtonsTaskHandle = osThreadNew(ScanButtons, NULL, &ScanButtonsTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   ScanButtonsHandle = osThreadNew(ScanButtonsTask, NULL, &ScanButtons_attributes);
@@ -305,8 +320,8 @@ void MX_FREERTOS_Init(void) {
 * @retval None
 */
 /* USER CODE END Header_StartDefaultTask */
-//void StartDefaultTask(void *argument)
-//{
+void StartDefaultTask(void *argument)
+{
   /* USER CODE BEGIN defaultTask */
   /* Infinite loop */
   //for(;;)
@@ -314,7 +329,7 @@ void MX_FREERTOS_Init(void) {
     //osDelay(1);
   //}
   /* USER CODE END defaultTask */
-//}
+}
 
 /* USER CODE BEGIN Header_RecordTask */
 /**
@@ -1396,98 +1411,22 @@ void InitializeTask(void *argument)
   /* USER CODE END Initialize */
 }
 
-void ScanButtonsTask(void *argument)
+/* USER CODE BEGIN Header_ScanButtons */
+/**
+* @brief Function implementing the ScanButtonsTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_ScanButtons */
+void ScanButtons(void *argument)
 {
-  /* USER CODE BEGIN ScanButtons */
+  /* USER CODE BEGIN ScanButtonsTask */
   /* Infinite loop */
-  //TickType_t last_wake_time;
-  //const TickType_t sample_interval = 20/portTICK_PERIOD_MS;
-
-  uint16_t centerButtonPastState, sdCardSwitchPastState;
-  uint16_t centerButtonCurrentState, sdCardSwitchCurrentState;
-
-  uint8_t centerButtonCounter = 0;
-  uint8_t sdCardSwitchCounter = 0; //sdCardSwitch
-
-  centerButtonPastState = HAL_GPIO_ReadPin(PUSHBUTTON2_GPIO_Port,PUSHBUTTON2_Pin);
-  sdCardSwitchPastState = HAL_GPIO_ReadPin(SDCARD_DETECT_GPIO_Port,SDCARD_DETECT_Pin);
-
-  //last_wake_time = xTaskGetTickCount();
-
   for(;;)
   {
-
-    osDelay(20);
-
-    centerButtonCurrentState = HAL_GPIO_ReadPin(PUSHBUTTON2_GPIO_Port,PUSHBUTTON2_Pin);
-    sdCardSwitchCurrentState = HAL_GPIO_ReadPin(SDCARD_DETECT_GPIO_Port,SDCARD_DETECT_Pin);
-
-    if(centerButtonCurrentState == centerButtonPastState)
-    {
-      centerButtonCounter = 0;
-    }
-    else
-    {
-      centerButtonCounter++;
-      if(centerButtonCounter == 8)
-      {
-        centerButtonPastState = centerButtonCurrentState;
-        if(centerButtonCurrentState == 0)
-        {
-          //strcpy(DisplayMessage.Line1, "Center Button Down");
-          xEventGroupSetBits(xEventGroup, CENTER_BTN_SIGNAL);
-        }
-        //xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
-      }
-    }
-
-    if(sdCardSwitchCurrentState == sdCardSwitchPastState)
-    {
-      sdCardSwitchCounter = 0;
-    }
-    else
-    {
-      sdCardSwitchCounter++;
-      if(sdCardSwitchCounter == 16)
-      {
-        sdCardSwitchPastState = sdCardSwitchCurrentState;
-        if(sdCardSwitchCurrentState == 0)
-        {
-          //strcpy(DisplayMessage.Line1, "SD Card In");
-          osThreadResume(InitializeHandle);
-        }
-        else
-        {
-          //strcpy(DisplayMessage.Line1, "SD Card Out");
-          if(eTaskGetState(RecordHandle)==eRunning)
-            osThreadSuspend(RecordHandle);
-
-          if(eTaskGetState(StandbyHandle)==eRunning)
-            osThreadSuspend(StandbyHandle);
-
-          if(eTaskGetState(InitializeHandle)==eRunning)
-            osThreadSuspend(InitializeHandle);
-
-          //DeInit_MDF1_Interface();
-          StandbyWithLidOpen();
-
-          RTC_DeactivateAlarm(RTC_ALARM_A); //Deactivate Alarm A
-          RTC_DeactivateAlarm(RTC_ALARM_B); //Deactivate Alarm B
-
-          HAL_SD_DeInit(&hsd1);
-          strcpy(DisplayMessage.Line1, "SD Card Ejected");
-          strcpy(DisplayMessage.Line2, "");
-          strcpy(DisplayMessage.Line3, "");
-          strcpy(DisplayMessage.Line4, "");
-          DisplayMessage.LineCount = 4;
-          xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
-        }
-
-        //xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
-      }
-    }
+    osDelay(1);
   }
-  /* USER CODE END ScanButtons */
+  /* USER CODE END ScanButtonsTask */
 }
 
 /* Private application code --------------------------------------------------*/

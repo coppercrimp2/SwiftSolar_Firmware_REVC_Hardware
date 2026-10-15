@@ -80,7 +80,7 @@ extern "C" {
 /*#define HAL_SRAM_MODULE_ENABLED */
 #define HAL_TIM_MODULE_ENABLED
 /*#define HAL_TSC_MODULE_ENABLED */
-/*#define HAL_UART_MODULE_ENABLED */
+#define HAL_UART_MODULE_ENABLED
 /*#define HAL_USART_MODULE_ENABLED */
 /*#define HAL_WWDG_MODULE_ENABLED */
 /*#define HAL_XSPI_MODULE_ENABLED */
@@ -249,7 +249,7 @@ vary depending on the variations in voltage and temperature.*/
 
 /* ################## SDMMC peripheral configuration ######################### */
 
-#define USE_SD_TRANSCEIVER            1U
+#define USE_SD_TRANSCEIVER            0U
 
 /* ################## SDIO peripheral configuration ########################## */
 #define USE_SDIO_TRANSCEIVER          0U

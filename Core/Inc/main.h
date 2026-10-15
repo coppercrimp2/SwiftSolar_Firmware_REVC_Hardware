@@ -68,17 +68,18 @@ extern DMA_QListTypeDef MDFQueue;
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define HallSensor_Pin GPIO_PIN_7
+#define HallSensor_Pin GPIO_PIN_1
 #define HallSensor_GPIO_Port GPIOA
-#define HallSensor_EXTI_IRQn EXTI7_IRQn
 #define OLED_13V_EN_Pin GPIO_PIN_0
 #define OLED_13V_EN_GPIO_Port GPIOB
-#define PUSHBUTTON1_Pin GPIO_PIN_8
-#define PUSHBUTTON1_GPIO_Port GPIOD
-#define PUSHBUTTON2_Pin GPIO_PIN_9
-#define PUSHBUTTON2_GPIO_Port GPIOD
-#define PUSHBUTTON3_Pin GPIO_PIN_10
-#define PUSHBUTTON3_GPIO_Port GPIOD
+#define BTN_INT_Pin GPIO_PIN_15
+#define BTN_INT_GPIO_Port GPIOB
+#define BTN_LEFT_Pin GPIO_PIN_8
+#define BTN_LEFT_GPIO_Port GPIOD
+#define BTN_PBOUT_Pin GPIO_PIN_9
+#define BTN_PBOUT_GPIO_Port GPIOD
+#define BTN_PSHOLD_Pin GPIO_PIN_10
+#define BTN_PSHOLD_GPIO_Port GPIOD
 #define OLED_CS_Pin GPIO_PIN_11
 #define OLED_CS_GPIO_Port GPIOD
 #define OLED_RST_Pin GPIO_PIN_12
@@ -91,12 +92,19 @@ extern DMA_QListTypeDef MDFQueue;
 #define STATUS_2_GPIO_Port GPIOD
 #define PWR_3p3V_Enable_Pin GPIO_PIN_6
 #define PWR_3p3V_Enable_GPIO_Port GPIOC
+#define BTN_ENTER_Pin GPIO_PIN_7
+#define BTN_ENTER_GPIO_Port GPIOC
+#define BTN_MEMO_Pin GPIO_PIN_8
+#define BTN_MEMO_GPIO_Port GPIOA
 #define USB_VBUS_Pin GPIO_PIN_9
 #define USB_VBUS_GPIO_Port GPIOA
 #define USB_VBUS_EXTI_IRQn EXTI9_IRQn
+#define BTN_TIME_Pin GPIO_PIN_4
+#define BTN_TIME_GPIO_Port GPIOD
+#define BTN_RIGHT_Pin GPIO_PIN_5
+#define BTN_RIGHT_GPIO_Port GPIOD
 #define SDCARD_DETECT_Pin GPIO_PIN_5
 #define SDCARD_DETECT_GPIO_Port GPIOB
-#define SDCARD_DETECT_EXTI_IRQn EXTI5_IRQn
 #define SDCard_En_Pin GPIO_PIN_7
 #define SDCard_En_GPIO_Port GPIOB
 #define SDCARD_PWR_EN_Pin GPIO_PIN_9

@@ -83,17 +83,14 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
 
   /** Initializes the peripherals clock
   */
-    if((RCC->CCIPR1 & 12288) != 12288)
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C2;
+    PeriphClkInit.I2c2ClockSelection = RCC_I2C2CLKSOURCE_MSIK;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
     {
-      PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C2;
-      PeriphClkInit.I2c2ClockSelection = RCC_I2C2CLKSOURCE_MSIK;
-      if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-      {
-        Error_Handler();
-      }
-
-      __HAL_RCC_GPIOB_CLK_ENABLE();
+      Error_Handler();
     }
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     /**I2C2 GPIO Configuration
     PB10     ------> I2C2_SCL
     PB11     ------> I2C2_SDA

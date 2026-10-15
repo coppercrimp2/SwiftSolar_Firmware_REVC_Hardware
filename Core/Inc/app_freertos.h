@@ -54,13 +54,14 @@ extern "C" {
 /* USER CODE BEGIN EM */
 extern osThreadId_t ScanButtonsHandle;
 /* USER CODE END EM */
-//extern osThreadId_t defaultTaskHandle;
+extern osThreadId_t defaultTaskHandle;
 extern osThreadId_t RecordHandle;
 extern osThreadId_t StandbyHandle;
 extern osThreadId_t ErrorHandle;
 extern osThreadId_t DisplayUpdateHandle;
 extern osThreadId_t HallEffectSensorHandle;
 extern osThreadId_t InitializeHandle;
+extern osThreadId_t ScanButtonsTaskHandle;
 extern osMessageQueueId_t QueueDisplayMessageHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
@@ -68,14 +69,14 @@ extern osMessageQueueId_t QueueDisplayMessageHandle;
 void ScanButtonsTask(void *argument);
 /* USER CODE END FunctionPrototypes */
 
-//void StartDefaultTask(void *argument);
+void StartDefaultTask(void *argument);
 void RecordTask(void *argument);
 void StandbyTask(void *argument);
 void ErrorTask(void *argument);
 void DisplayUpdateTask(void *argument);
 void HallEffectSensorTask(void *argument);
 void InitializeTask(void *argument);
-//void ScanButtons(void *argument);
+void ScanButtons(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
