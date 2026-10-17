@@ -23,10 +23,7 @@
 #include "i2c.h"
 #include "icache.h"
 #include "mdf.h"
-#include "rtc.h"
 #include "sdmmc.h"
-#include "usart.h"
-#include "usb_otg.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -119,7 +116,7 @@ __attribute__((section(".txtfil_deflts"))) uint8_t INITIALIZE_TXTFILE_VARIABLES[
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
+//void SystemClock_Config(void);
 static void SystemPower_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
@@ -167,14 +164,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_GPDMA1_Init();
-  MX_MDF1_Init();
-  MX_SDMMC1_SD_Init();
+
   MX_ICACHE_Init();
-  MX_I2C2_Init();
-  MX_RTC_Init();
-  MX_USB_OTG_FS_PCD_Init();
-  MX_USART1_UART_Init();
+
+  RTC_Init();
   /* USER CODE BEGIN 2 */
 
   //HAL_GPIO_WritePin(PWR_3p3V_Enable_GPIO_Port, PWR_3p3V_Enable_Pin, GPIO_PIN_SET); //3.3V Enable
@@ -199,12 +192,12 @@ int main(void)
     HAL_GPIO_WritePin(OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_SET);
     HAL_Delay(10);
 
-    HAL_GPIO_WritePin(GPIOB, OLED_CS_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin, GPIO_PIN_SET);
     HAL_Delay(10);
-    HAL_GPIO_WritePin(GPIOB, OLED_CS_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(OLED_CS_GPIO_Port, OLED_CS_Pin, GPIO_PIN_RESET);
     HAL_Delay(10);
 
-    HAL_GPIO_WritePin(GPIOB, OLED_13V_EN_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(OLED_13V_EN_GPIO_Port, OLED_13V_EN_Pin, GPIO_PIN_SET);
     HAL_Delay(10);
 
     HAL_GPIO_WritePin(SDCARD_PWR_EN_GPIO_Port, SDCARD_PWR_EN_Pin, GPIO_PIN_RESET);
@@ -218,12 +211,12 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();
+  //osKernelInitialize();
   /* Call init function for freertos objects (in app_freertos.c) */
-  MX_FREERTOS_Init();
+  //MX_FREERTOS_Init();
 
   /* Start scheduler */
-  osKernelStart();
+  //osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
 

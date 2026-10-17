@@ -134,21 +134,14 @@ osThreadId_t HallEffectSensorHandle;
 const osThreadAttr_t HallEffectSensor_attributes = {
   .name = "HallEffectSensor",
   .priority = (osPriority_t) osPriorityLow1,
-  .stack_size = 128 * 4
+  .stack_size = 500 * 4
 };
 /* Definitions for Initialize */
 osThreadId_t InitializeHandle;
 const osThreadAttr_t Initialize_attributes = {
   .name = "Initialize",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 1000 * 4
-};
-/* Definitions for ScanButtonsTask */
-osThreadId_t ScanButtonsTaskHandle;
-const osThreadAttr_t ScanButtonsTask_attributes = {
-  .name = "ScanButtonsTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 256 * 4
+  .stack_size = 600 * 4
 };
 /* Definitions for QueueDisplayMessage */
 osMessageQueueId_t QueueDisplayMessageHandle;
@@ -299,8 +292,8 @@ void MX_FREERTOS_Init(void) {
   /* creation of Initialize */
   InitializeHandle = osThreadNew(InitializeTask, NULL, &Initialize_attributes);
 
-  /* creation of ScanButtonsTask */
-  ScanButtonsTaskHandle = osThreadNew(ScanButtons, NULL, &ScanButtonsTask_attributes);
+  /* creation of ScanButtons */
+  ScanButtonsHandle = osThreadNew(ScanButtonsTask, NULL, &ScanButtons_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   ScanButtonsHandle = osThreadNew(ScanButtonsTask, NULL, &ScanButtons_attributes);
@@ -1411,22 +1404,22 @@ void InitializeTask(void *argument)
   /* USER CODE END Initialize */
 }
 
-/* USER CODE BEGIN Header_ScanButtons */
+/* USER CODE BEGIN Header_ScanButtonsTask */
 /**
-* @brief Function implementing the ScanButtonsTask thread.
+* @brief Function implementing the ScanButtons thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_ScanButtons */
-void ScanButtons(void *argument)
+/* USER CODE END Header_ScanButtonsTask */
+void ScanButtonsTask(void *argument)
 {
-  /* USER CODE BEGIN ScanButtonsTask */
+  /* USER CODE BEGIN ScanButtons */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END ScanButtonsTask */
+  /* USER CODE END ScanButtons */
 }
 
 /* Private application code --------------------------------------------------*/

@@ -61,7 +61,7 @@ extern osThreadId_t ErrorHandle;
 extern osThreadId_t DisplayUpdateHandle;
 extern osThreadId_t HallEffectSensorHandle;
 extern osThreadId_t InitializeHandle;
-extern osThreadId_t ScanButtonsTaskHandle;
+extern osThreadId_t ScanButtonsHandle;
 extern osMessageQueueId_t QueueDisplayMessageHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
@@ -76,7 +76,7 @@ void ErrorTask(void *argument);
 void DisplayUpdateTask(void *argument);
 void HallEffectSensorTask(void *argument);
 void InitializeTask(void *argument);
-void ScanButtons(void *argument);
+void ScanButtonsTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

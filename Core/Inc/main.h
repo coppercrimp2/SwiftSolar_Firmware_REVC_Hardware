@@ -90,8 +90,6 @@ extern DMA_QListTypeDef MDFQueue;
 #define STATUS_1_GPIO_Port GPIOD
 #define STATUS_2_Pin GPIO_PIN_15
 #define STATUS_2_GPIO_Port GPIOD
-#define PWR_3p3V_Enable_Pin GPIO_PIN_6
-#define PWR_3p3V_Enable_GPIO_Port GPIOC
 #define BTN_ENTER_Pin GPIO_PIN_7
 #define BTN_ENTER_GPIO_Port GPIOC
 #define BTN_MEMO_Pin GPIO_PIN_8
@@ -114,6 +112,8 @@ extern DMA_QListTypeDef MDFQueue;
 //#define REC_BUFF_SIZE        (32764)//(16382)//(2048U)//(1024U)
 //#define REC_BUFF_SIZE_DIV2  (REC_BUFF_SIZE / 2)
 /* USER CODE END Private defines */
+
+
 
 #ifdef __cplusplus
 }

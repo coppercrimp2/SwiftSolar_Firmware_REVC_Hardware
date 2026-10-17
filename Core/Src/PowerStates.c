@@ -60,16 +60,42 @@ void RecordingWithLidClosed()
     HAL_I2C_MspDeInit(&hi2c2);
   }
 
-  //Set PUSHBUTTON1, PUSHBUTTON2, PUSHBUTTON3 to analog
-  //PUSHBUTTON1 - PD8
-  //PUSHBUTTON2 - PD9
-  //PUSHBUTTON3 - PD10
-  if((PUSHBUTTON3_GPIO_Port->MODER & 3145728) != 3145728)
+/*Pushbutton inputs: BTN_TIME BTN_RIGHT BTN_LEFT BTN_ENTER BTN_MEMO BTN_PBOUT
+#define BTN_TIME_Pin GPIO_PIN_4
+#define BTN_TIME_GPIO_Port GPIOD
+#define BTN_RIGHT_Pin GPIO_PIN_5
+#define BTN_RIGHT_GPIO_Port GPIOD
+#define BTN_LEFT_Pin GPIO_PIN_8
+#define BTN_LEFT_GPIO_Port GPIOD
+#define BTN_ENTER_Pin GPIO_PIN_7
+#define BTN_ENTER_GPIO_Port GPIOC
+#define BTN_MEMO_Pin GPIO_PIN_8
+#define BTN_MEMO_GPIO_Port GPIOA
+#define BTN_PBOUT_Pin GPIO_PIN_9
+#define BTN_PBOUT_GPIO_Port GPIOD
+ */
+  if((BTN_TIME_GPIO_Port->MODER & 3145728) != 3145728)
   {
-    GPIO_InitStruct.Pin = PUSHBUTTON1_Pin|PUSHBUTTON2_Pin|PUSHBUTTON3_Pin;
+    GPIO_InitStruct.Pin = BTN_TIME_Pin|BTN_RIGHT_Pin|BTN_LEFT_Pin|BTN_PBOUT_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(PUSHBUTTON3_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(BTN_TIME_GPIO_Port, &GPIO_InitStruct);
+  }
+
+  if((BTN_ENTER_GPIO_Port->MODER & 3145728) != 3145728)
+  {
+    GPIO_InitStruct.Pin = BTN_ENTER_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(BTN_ENTER_GPIO_Port, &GPIO_InitStruct);
+  }
+
+  if((BTN_MEMO_GPIO_Port->MODER & 3145728) != 3145728)
+  {
+    GPIO_InitStruct.Pin = BTN_MEMO_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(BTN_MEMO_GPIO_Port, &GPIO_InitStruct);
   }
 
   if((OLED_CS_GPIO_Port->ODR & OLED_CS_Pin) != OLED_CS_Pin)
@@ -110,17 +136,44 @@ void RecordingWithLidOpen()
     MX_I2C2_Init();
   }
 
-  //Set PUSHBUTTON1, PUSHBUTTON2, PUSHBUTTON3 to analog
-  //PUSHBUTTON1 - PD8
-  //PUSHBUTTON2 - PD9
-  //PUSHBUTTON3 - PD10
-  if((PUSHBUTTON3_GPIO_Port->MODER & 3145728) == 3145728) //If this expression is true, it means the pushbutton inputs are deactivated and set to analog
-  {
-    GPIO_InitStruct.Pin = PUSHBUTTON1_Pin|PUSHBUTTON2_Pin|PUSHBUTTON3_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-  }
+  /*
+  Pushbutton inputs: BTN_TIME BTN_RIGHT BTN_LEFT BTN_ENTER BTN_MEMO BTN_PBOUT
+  #define BTN_TIME_Pin GPIO_PIN_4
+  #define BTN_TIME_GPIO_Port GPIOD
+  #define BTN_RIGHT_Pin GPIO_PIN_5
+  #define BTN_RIGHT_GPIO_Port GPIOD
+  #define BTN_LEFT_Pin GPIO_PIN_8
+  #define BTN_LEFT_GPIO_Port GPIOD
+  #define BTN_ENTER_Pin GPIO_PIN_7
+  #define BTN_ENTER_GPIO_Port GPIOC
+  #define BTN_MEMO_Pin GPIO_PIN_8
+  #define BTN_MEMO_GPIO_Port GPIOA
+  #define BTN_PBOUT_Pin GPIO_PIN_9
+  #define BTN_PBOUT_GPIO_Port GPIOD
+  */
+    if((BTN_TIME_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_TIME_Pin|BTN_RIGHT_Pin|BTN_LEFT_Pin|BTN_PBOUT_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_TIME_GPIO_Port, &GPIO_InitStruct);
+    }
+
+    if((BTN_ENTER_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_ENTER_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_ENTER_GPIO_Port, &GPIO_InitStruct);
+    }
+
+    if((BTN_MEMO_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_MEMO_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_MEMO_GPIO_Port, &GPIO_InitStruct);
+    }
 
   if((OLED_CS_GPIO_Port->ODR & OLED_CS_Pin) == OLED_CS_Pin)
   {
@@ -161,17 +214,43 @@ void StandbyWithLidClosed()
     HAL_I2C_MspDeInit(&hi2c2);
   }
 
-  //Set PUSHBUTTON1, PUSHBUTTON2, PUSHBUTTON3 to analog
-  //PUSHBUTTON1 - PD8
-  //PUSHBUTTON2 - PD9
-  //PUSHBUTTON3 - PD10
-  if((PUSHBUTTON3_GPIO_Port->MODER & 3145728) != 3145728)
-  {
-    GPIO_InitStruct.Pin = PUSHBUTTON1_Pin|PUSHBUTTON2_Pin|PUSHBUTTON3_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(PUSHBUTTON3_GPIO_Port, &GPIO_InitStruct);
-  }
+  /*Pushbutton inputs: BTN_TIME BTN_RIGHT BTN_LEFT BTN_ENTER BTN_MEMO BTN_PBOUT
+  #define BTN_TIME_Pin GPIO_PIN_4
+  #define BTN_TIME_GPIO_Port GPIOD
+  #define BTN_RIGHT_Pin GPIO_PIN_5
+  #define BTN_RIGHT_GPIO_Port GPIOD
+  #define BTN_LEFT_Pin GPIO_PIN_8
+  #define BTN_LEFT_GPIO_Port GPIOD
+  #define BTN_ENTER_Pin GPIO_PIN_7
+  #define BTN_ENTER_GPIO_Port GPIOC
+  #define BTN_MEMO_Pin GPIO_PIN_8
+  #define BTN_MEMO_GPIO_Port GPIOA
+  #define BTN_PBOUT_Pin GPIO_PIN_9
+  #define BTN_PBOUT_GPIO_Port GPIOD
+   */
+    if((BTN_TIME_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_TIME_Pin|BTN_RIGHT_Pin|BTN_LEFT_Pin|BTN_PBOUT_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_TIME_GPIO_Port, &GPIO_InitStruct);
+    }
+
+    if((BTN_ENTER_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_ENTER_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_ENTER_GPIO_Port, &GPIO_InitStruct);
+    }
+
+    if((BTN_MEMO_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_MEMO_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_MEMO_GPIO_Port, &GPIO_InitStruct);
+    }
 
   if((OLED_CS_GPIO_Port->ODR & OLED_CS_Pin) != OLED_CS_Pin)
   {
@@ -212,17 +291,44 @@ void StandbyWithLidOpen()
     MX_I2C2_Init();
   }
 
-  //Set PUSHBUTTON1, PUSHBUTTON2, PUSHBUTTON3 to analog
-  //PUSHBUTTON1 - PD8
-  //PUSHBUTTON2 - PD9
-  //PUSHBUTTON3 - PD10
-  if((PUSHBUTTON3_GPIO_Port->MODER & 3145728) == 3145728) //If this expression is true, it means the pushbutton inputs are deactivated and set to analog
-  {
-    GPIO_InitStruct.Pin = PUSHBUTTON1_Pin|PUSHBUTTON2_Pin|PUSHBUTTON3_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-  }
+  /*
+  Pushbutton inputs: BTN_TIME BTN_RIGHT BTN_LEFT BTN_ENTER BTN_MEMO BTN_PBOUT
+  #define BTN_TIME_Pin GPIO_PIN_4
+  #define BTN_TIME_GPIO_Port GPIOD
+  #define BTN_RIGHT_Pin GPIO_PIN_5
+  #define BTN_RIGHT_GPIO_Port GPIOD
+  #define BTN_LEFT_Pin GPIO_PIN_8
+  #define BTN_LEFT_GPIO_Port GPIOD
+  #define BTN_ENTER_Pin GPIO_PIN_7
+  #define BTN_ENTER_GPIO_Port GPIOC
+  #define BTN_MEMO_Pin GPIO_PIN_8
+  #define BTN_MEMO_GPIO_Port GPIOA
+  #define BTN_PBOUT_Pin GPIO_PIN_9
+  #define BTN_PBOUT_GPIO_Port GPIOD
+  */
+    if((BTN_TIME_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_TIME_Pin|BTN_RIGHT_Pin|BTN_LEFT_Pin|BTN_PBOUT_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_TIME_GPIO_Port, &GPIO_InitStruct);
+    }
+
+    if((BTN_ENTER_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_ENTER_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_ENTER_GPIO_Port, &GPIO_InitStruct);
+    }
+
+    if((BTN_MEMO_GPIO_Port->MODER & 3145728) != 3145728)
+    {
+      GPIO_InitStruct.Pin = BTN_MEMO_Pin;
+      GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+      GPIO_InitStruct.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(BTN_MEMO_GPIO_Port, &GPIO_InitStruct);
+    }
 
   if((OLED_CS_GPIO_Port->ODR & OLED_CS_Pin) == OLED_CS_Pin)
   {
