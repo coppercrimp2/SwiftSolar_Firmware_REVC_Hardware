@@ -535,6 +535,8 @@ HAL_StatusTypeDef HAL_MDF_DeInit(MDF_HandleTypeDef *hmdf)
 
         /* Disable clock generator */
         p_mdf_base->CKGCR &= ~(MDF_CKGCR_CKDEN);
+
+        HAL_MDF_MspDeInit(hmdf);
       }
 
       /* Call MDF MSP deinit function */
@@ -545,7 +547,7 @@ HAL_StatusTypeDef HAL_MDF_DeInit(MDF_HandleTypeDef *hmdf)
       }
       hmdf->MspDeInitCallback(hmdf);
 #else /* USE_HAL_MDF_REGISTER_CALLBACKS */
-      HAL_MDF_MspDeInit(hmdf);
+      //HAL_MDF_MspDeInit(hmdf);
 #endif /* USE_HAL_MDF_REGISTER_CALLBACKS */
 
       /* Update instance counter and table */

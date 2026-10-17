@@ -52,9 +52,7 @@ extern "C" {
 
 /* Exported macro -------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-extern osThreadId_t ScanButtonsHandle;
 /* USER CODE END EM */
-extern osThreadId_t defaultTaskHandle;
 extern osThreadId_t RecordHandle;
 extern osThreadId_t StandbyHandle;
 extern osThreadId_t ErrorHandle;
@@ -66,7 +64,7 @@ extern osMessageQueueId_t QueueDisplayMessageHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-void ScanButtonsTask(void *argument);
+
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);

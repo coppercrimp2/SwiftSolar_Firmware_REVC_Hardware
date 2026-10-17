@@ -94,13 +94,6 @@ const osThreadAttr_t ScanButtons_attributes = {
   .stack_size = 256 * 4
 };
 /* USER CODE END Variables */
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
-};
 /* Definitions for Record */
 osThreadId_t RecordHandle;
 const osThreadAttr_t Record_attributes = {
@@ -271,8 +264,6 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of Record */
   RecordHandle = osThreadNew(RecordTask, NULL, &Record_attributes);
@@ -296,7 +287,7 @@ void MX_FREERTOS_Init(void) {
   ScanButtonsHandle = osThreadNew(ScanButtonsTask, NULL, &ScanButtons_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  ScanButtonsHandle = osThreadNew(ScanButtonsTask, NULL, &ScanButtons_attributes);
+
   /* add threads, ... */
   osKernelStart();
   /* USER CODE END RTOS_THREADS */
@@ -305,23 +296,6 @@ void MX_FREERTOS_Init(void) {
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
-}
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-* @brief Function implementing the defaultTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN defaultTask */
-  /* Infinite loop */
-  //for(;;)
-  //{
-    //osDelay(1);
-  //}
-  /* USER CODE END defaultTask */
 }
 
 /* USER CODE BEGIN Header_RecordTask */
@@ -1414,11 +1388,94 @@ void InitializeTask(void *argument)
 void ScanButtonsTask(void *argument)
 {
   /* USER CODE BEGIN ScanButtons */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+    /* Infinite loop */
+    //TickType_t last_wake_time;
+    //const TickType_t sample_interval = 20/portTICK_PERIOD_MS;
+
+    uint16_t centerButtonPastState, sdCardSwitchPastState;
+    uint16_t centerButtonCurrentState, sdCardSwitchCurrentState;
+
+    uint8_t centerButtonCounter = 0;
+    uint8_t sdCardSwitchCounter = 0; //sdCardSwitch
+
+    centerButtonPastState = HAL_GPIO_ReadPin(BTN_ENTER_GPIO_Port,BTN_ENTER_Pin);
+    sdCardSwitchPastState = HAL_GPIO_ReadPin(SDCARD_DETECT_GPIO_Port,SDCARD_DETECT_Pin);
+
+    //last_wake_time = xTaskGetTickCount();
+
+    for(;;)
+    {
+
+      osDelay(20);
+
+      centerButtonCurrentState = HAL_GPIO_ReadPin(BTN_ENTER_GPIO_Port,BTN_ENTER_Pin);
+      sdCardSwitchCurrentState = HAL_GPIO_ReadPin(SDCARD_DETECT_GPIO_Port,SDCARD_DETECT_Pin);
+
+      if(centerButtonCurrentState == centerButtonPastState)
+      {
+        centerButtonCounter = 0;
+      }
+      else
+      {
+        centerButtonCounter++;
+        if(centerButtonCounter == 8)
+        {
+          centerButtonPastState = centerButtonCurrentState;
+          if(centerButtonCurrentState == 0)
+          {
+            //strcpy(DisplayMessage.Line1, "Center Button Down");
+            xEventGroupSetBits(xEventGroup, CENTER_BTN_SIGNAL);
+          }
+          //xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
+        }
+      }
+
+      if(sdCardSwitchCurrentState == sdCardSwitchPastState)
+      {
+        sdCardSwitchCounter = 0;
+      }
+      else
+      {
+        sdCardSwitchCounter++;
+        if(sdCardSwitchCounter == 16)
+        {
+          sdCardSwitchPastState = sdCardSwitchCurrentState;
+          if(sdCardSwitchCurrentState == 0)
+          {
+            //strcpy(DisplayMessage.Line1, "SD Card In");
+            osThreadResume(InitializeHandle);
+          }
+          else
+          {
+            //strcpy(DisplayMessage.Line1, "SD Card Out");
+            if(eTaskGetState(RecordHandle)==eRunning)
+              osThreadSuspend(RecordHandle);
+
+            if(eTaskGetState(StandbyHandle)==eRunning)
+              osThreadSuspend(StandbyHandle);
+
+            if(eTaskGetState(InitializeHandle)==eRunning)
+              osThreadSuspend(InitializeHandle);
+
+            //DeInit_MDF1_Interface();
+            StandbyWithLidOpen();
+
+            RTC_DeactivateAlarm(RTC_ALARM_A); //Deactivate Alarm A
+            RTC_DeactivateAlarm(RTC_ALARM_B); //Deactivate Alarm B
+
+            HAL_SD_DeInit(&hsd1);
+            strcpy(DisplayMessage.Line1, "SD Card Ejected");
+            strcpy(DisplayMessage.Line2, "");
+            strcpy(DisplayMessage.Line3, "");
+            strcpy(DisplayMessage.Line4, "");
+            DisplayMessage.LineCount = 4;
+            xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
+          }
+
+          //xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
+        }
+      }
+    }
   /* USER CODE END ScanButtons */
 }
 
