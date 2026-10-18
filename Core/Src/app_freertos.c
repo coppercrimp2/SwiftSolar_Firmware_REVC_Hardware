@@ -40,6 +40,7 @@
 #include "linked_list.h"
 #include "task.h"
 #include "PowerStates.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,7 +72,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -191,6 +192,8 @@ __weak void PreSleepProcessing(uint32_t ulExpectedIdleTime)
 /* place for user code */
   ulExpectedIdleTime = 0;
 
+  printf("EnteringSleep\n\r");
+
   HAL_SuspendTick(); //TIM2 Disable
 
   if(SystemFlags.LidClosed == false)  // LID IS OPEN
@@ -207,6 +210,8 @@ __weak void PostSleepProcessing(uint32_t ulExpectedIdleTime)
 {
 /* place for user code */
   (void) ulExpectedIdleTime;
+
+  printf("ExitingSleep\n\r");
 
   if(SystemFlags.LidClosed == true)
   {
@@ -231,6 +236,8 @@ void MX_FREERTOS_Init(void) {
   //** Get WAV File Attributes ***
   SwiftSettings_GetWAVFileAttributes(&WAVFile);
   //** Get schedule attributes ***
+
+  MX_USART1_UART_Init();
 
   MX_GPDMA1_Init();
   __HAL_LINKDMA(&MdfHandle0, hdma, handle_GPDMA1_Channel11);
@@ -1599,5 +1606,14 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
   //}
 
 }
+
+PUTCHAR_PROTOTYPE
+{
+ /* Place your implementation of fputc here */
+ /* e.g. write a character to the USART1 and Loop until the end of transmission */
+ HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
+ return ch;
+}
+
 /* USER CODE END Application */
 

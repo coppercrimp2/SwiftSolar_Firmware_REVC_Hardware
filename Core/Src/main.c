@@ -168,6 +168,7 @@ int main(void)
   MX_ICACHE_Init();
 
   RTC_Init();
+
   /* USER CODE BEGIN 2 */
 
   //HAL_GPIO_WritePin(PWR_3p3V_Enable_GPIO_Port, PWR_3p3V_Enable_Pin, GPIO_PIN_SET); //3.3V Enable
