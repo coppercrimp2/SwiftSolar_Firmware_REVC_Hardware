@@ -192,8 +192,6 @@ __weak void PreSleepProcessing(uint32_t ulExpectedIdleTime)
 /* place for user code */
   ulExpectedIdleTime = 0;
 
-  printf("EnteringSleep\n\r");
-
   HAL_SuspendTick(); //TIM2 Disable
 
   if(SystemFlags.LidClosed == false)  // LID IS OPEN
@@ -202,6 +200,7 @@ __weak void PreSleepProcessing(uint32_t ulExpectedIdleTime)
   }
   else  // LID IS CLOSED
   {
+    printf("EnteringStop1\n\r");
     HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFI);
   }
 }
@@ -211,11 +210,10 @@ __weak void PostSleepProcessing(uint32_t ulExpectedIdleTime)
 /* place for user code */
   (void) ulExpectedIdleTime;
 
-  printf("ExitingSleep\n\r");
-
   if(SystemFlags.LidClosed == true)
   {
     SystemClock_Config();
+    printf("ExitingStop1\n\r");
     //MX_GPDMA1_Init();
     //MX_MDF1_Init();
   }
