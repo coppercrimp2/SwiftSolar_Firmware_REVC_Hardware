@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #define OS_DELAY
+#define DEBUG_MESSAGES
 #include <string.h>
 #include <stdio.h>
 #include "queue.h"
@@ -200,7 +201,7 @@ __weak void PreSleepProcessing(uint32_t ulExpectedIdleTime)
   }
   else  // LID IS CLOSED
   {
-    printf("EnteringStop1\n\r");
+    //printf("EnteringStop1\n\r");
     HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFI);
   }
 }
@@ -213,7 +214,7 @@ __weak void PostSleepProcessing(uint32_t ulExpectedIdleTime)
   if(SystemFlags.LidClosed == true)
   {
     SystemClock_Config();
-    printf("ExitingStop1\n\r");
+    //printf("ExitingStop1\n\r");
     //MX_GPDMA1_Init();
     //MX_MDF1_Init();
   }
@@ -229,17 +230,20 @@ __weak void PostSleepProcessing(uint32_t ulExpectedIdleTime)
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
+  printf("\r\n\r\n\r\nStarting MX_FREERTOS_Init function (233)\r\n");
   xEventGroup = xEventGroupCreate();
 
   //** Get WAV File Attributes ***
   SwiftSettings_GetWAVFileAttributes(&WAVFile);
   //** Get schedule attributes ***
 
-  MX_USART1_UART_Init();
+  //MX_USART1_UART_Init();
 
   MX_GPDMA1_Init();
   __HAL_LINKDMA(&MdfHandle0, hdma, handle_GPDMA1_Channel11);
   MX_MDF1_Init();
+
+  printf("MX_FREERTOS_Init function (246)\r\n");
 
   MX_MDFQueue_Config();
   HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel11, &MDFQueue);
@@ -250,6 +254,8 @@ void MX_FREERTOS_Init(void) {
   //ReInit_MDF1_Interface();
 
   osKernelInitialize();
+
+  printf("\r\nMX_FREERTOS_Init function (258)\r\n");
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -292,7 +298,7 @@ void MX_FREERTOS_Init(void) {
   ScanButtonsHandle = osThreadNew(ScanButtonsTask, NULL, &ScanButtons_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-
+  printf("\r\nStarting OS Kernel (301)\r\n");
   /* add threads, ... */
   osKernelStart();
   /* USER CODE END RTOS_THREADS */
@@ -319,14 +325,18 @@ void RecordTask(void *argument)
       volatile uint32_t MemoryArrayIndex = 0;
       volatile uint32_t DataSize;
 
+      printf("\r\nInitializing RecordTask (328)\r\n");
+
       /* USER CODE BEGIN RecordLoop */
       /* Infinite loop */
       for(;;)
       {
+        //printf("\r\nTop of RecordTask for loop (334)\r\n");
         __HAL_RCC_SDMMC1_CLK_DISABLE();
         uxBits = xEventGroupWaitBits(xEventGroup, (WRITEBUFFER1_SIGNAL | WRITEBUFFER2_SIGNAL | CENTER_BTN_SIGNAL | END_OF_DAY_SIGNAL | ALARM_A_SIGNAL | NEW_VOICE_MEMO_SIGNAL | LOW_BATTERY_SIGNAL), pdTRUE, pdFALSE, osWaitForever);
         __HAL_RCC_SDMMC1_CLK_ENABLE();
 
+        //printf("\r\nEvent triggered RecordTask for loop and __HAL_RCC_SDMMC1_CLK_ENABLE() (339)\r\n");
 
         if(uxBits & WRITEBUFFER1_SIGNAL) //Buffer is half full
         {
@@ -372,6 +382,7 @@ void RecordTask(void *argument)
 
         if(uxBits & (CENTER_BTN_SIGNAL | NEW_VOICE_MEMO_SIGNAL | LOW_BATTERY_SIGNAL))
         {
+          printf("\r\nEvent on CENTER_BTN_SIGNAL | NEW_VOICE_MEMO_SIGNAL | LOW_BATTERY_SIGNAL of RecordTask (385)\r\n");
           cndtrRegister = (handle_GPDMA1_Channel11.Instance->CBR1 / 2);
 
           DeInit_MDF1_Interface();
@@ -462,14 +473,18 @@ void RecordTask(void *argument)
           }
 
           osThreadSuspend(RecordHandle); //Suspend this task
+          printf("\r\nBottom of CENTER_BTN_SIGNAL | NEW_VOICE_MEMO_SIGNAL | LOW_BATTERY_SIGNAL of RecordTask (376)\r\n");
         }
 
         else if(uxBits & END_OF_DAY_SIGNAL)
         {
+          printf("\r\nEvent on END_OF_DAY_SIGNAL of RecordTask (481)\r\n");
           cndtrRegister = (handle_GPDMA1_Channel11.Instance->CBR1 / 2);
           MemoryArrayIndex = REC_BUFF_SIZE - cndtrRegister - 1;
 
           DeInit_MDF1_Interface();
+
+          printf("Entering END_OF_DAY_SIGNAL in RECORD TASK\r\n");
 
           if(MemoryArrayIndex >= REC_BUFF_SIZE_DIV2)
           {
@@ -505,6 +520,7 @@ void RecordTask(void *argument)
 
           if((SwiftSchedule.StartsAtMidnightFlag) && (RTC_CheckIfBetweenDates(SwiftSchedule.StartDate, SwiftSchedule.StopDate)))
           {
+            printf("END_OF_DAY if statement which checks for StartsAtMidnightFlag and start and end date RecordTask(523)\r\n");
             //f_chdir("..");//back up a directory <- THIS DOESNT WORK WITH EXFAT FILESYSTEM!!!
             f_chdir((char const*)WAVFile.RecordingDirName); // <- THIS REPLACES THE ABOVE LINE
 
@@ -546,6 +562,7 @@ void RecordTask(void *argument)
             }
             SwiftSchedule.CurrentRecordNumber = 0;
             SetNextStopTime(&SwiftSchedule);
+            printf("\r\nMade it to END_OF_DAY signal event code in RecordTask (565)\r\n");
           }
           else
           {
@@ -554,6 +571,7 @@ void RecordTask(void *argument)
             //__HAL_SAI_DISABLE(&hsai_BlockA2);
             //HAL_SAI_MspDeInit(&hsai_BlockA2);
             //hsai_BlockA2.State = HAL_SAI_STATE_RESET;
+            printf("Entering line 574 of RecordTask\n\r");
             if(SystemFlags.LidClosed == false)
             {
               StandbyWithLidOpen();
@@ -575,6 +593,7 @@ void RecordTask(void *argument)
         }
         else if(uxBits & ALARM_A_SIGNAL)
         {
+          printf("\r\nAlarm A interrupt in  RECORD TASK\r\n");
           cndtrRegister = (handle_GPDMA1_Channel11.Instance->CBR1 / 2);
           DeInit_MDF1_Interface();
 
@@ -659,12 +678,13 @@ void StandbyTask(void *argument)
 
       for(;;)
       {
+        printf("\r\nTop of StandbyTask for loop (681)\r\n");
         __HAL_RCC_SDMMC1_CLK_DISABLE();
 
         uxBits = xEventGroupWaitBits(xEventGroup, CENTER_BTN_SIGNAL | ALARM_A_SIGNAL | END_OF_DAY_SIGNAL | NEW_VOICE_MEMO_SIGNAL | LOW_BATTERY_SIGNAL, pdTRUE, pdFALSE, osWaitForever);
 
-        /*__HAL_RCC_SDMMC1_CLK_ENABLE();
-
+        //__HAL_RCC_SDMMC1_CLK_ENABLE();
+        /*
         BufferWritesPerFile = WAVFile.FileSize;
         if(SystemFlags.LidClosed == false)
         {
@@ -680,12 +700,15 @@ void StandbyTask(void *argument)
 
         //BSP_SD_Init();
         //AudioFiles_MountSDCard(&SwiftErrors);
-
+        printf("\r\nCENTER_BTN_SIGNAL | ALARM_A_SIGNAL | END_OF_DAY_SIGNAL | NEW_VOICE_MEMO_SIGNAL | LOW_BATTERY_SIGNAL event in StandbyTask (703)\r\n");
         switch (uxBits)
         {
           case (END_OF_DAY_SIGNAL):
+            printf("\r\nEND_OF_DAY_SIGNAL event occured in StandbyTask (707)\r\n");
             if(RTC_CheckIfBetweenDates(SwiftSchedule.StartDate, SwiftSchedule.StopDate))//Is current date between StartDate and StopDate?
             {
+              printf("\r\nEND_OF_DAY_SIGNAL event in StandbyTask we are between start and end date (710)\r\n");
+              __HAL_RCC_SDMMC1_CLK_ENABLE();
               //if(WAVFile.DirectoryLevel == 2)
               //{
                 //f_chdir("..");//back up a directory
@@ -704,9 +727,10 @@ void StandbyTask(void *argument)
               WAVFile.DirectoryLevel = 2;
               if(SwiftSchedule.StartsAtMidnightFlag == 1)
               {
+                printf("\r\nStartsAtMidnightFlag == 1 in StandbyTask (730)\r\n");
                 strcpy(DisplayMessage.Line1, "");
                 strcpy(DisplayMessage.Line2, "");
-                strcpy(DisplayMessage.Line3, "Recording");
+                strcpy(DisplayMessage.Line3, "Recording...");
                 strcpy(DisplayMessage.Line4, "");
                 DisplayMessage.LineCount = 4;
                 if(SystemFlags.LidClosed == false)
@@ -727,6 +751,8 @@ void StandbyTask(void *argument)
                   xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
                   osThreadSuspend(StandbyHandle); //Terminate this task
                 }
+
+                printf("\r\nStartsAtMidnightFlag == 1 and new directory and file created successfully in StandbyTask (755)\r\n");
 
                 SwiftSchedule.CurrentRecordNumber = 0;
                 SetNextStopTime(&SwiftSchedule);
@@ -750,6 +776,8 @@ void StandbyTask(void *argument)
 
           case (CENTER_BTN_SIGNAL):
 
+            printf("\r\nCENTER_BTN_SIGNAL event in StandbyTask (779)\r\n");
+
             strcpy(DisplayMessage.Line1, "Starting new");
             strcpy(DisplayMessage.Line2, "continuous");
             strcpy(DisplayMessage.Line3, "recording");
@@ -759,6 +787,8 @@ void StandbyTask(void *argument)
             {
               xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
             }
+
+            __HAL_RCC_SDMMC1_CLK_ENABLE();
 
             osDelay(700);
 
@@ -781,6 +811,8 @@ void StandbyTask(void *argument)
               xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
               osThreadSuspend(StandbyHandle); //Terminate this task
             }
+
+            printf("\r\nCENTER_BTN_SIGNAL event in StandbyTask and new files created successfully (815)\r\n");
             SwiftSchedule.EndsAtMidnightFlag = 0;
             SwiftSchedule.StartsAtMidnightFlag = 1;
             SwiftSchedule.CurrentRecordNumber = 0;
@@ -832,7 +864,7 @@ void StandbyTask(void *argument)
             break;
 
           case (ALARM_A_SIGNAL):
-
+            printf("\r\nALARM_A_SIGNAL event in StandbyTask (867)\r\n");
             strcpy(DisplayMessage.Line1, "");
             strcpy(DisplayMessage.Line2, "");
             strcpy(DisplayMessage.Line3, "Recording...");
@@ -856,6 +888,7 @@ void StandbyTask(void *argument)
             }
 
             //osDelay(50);
+            //printf("STANDBY TASK LINE 870\r\n");
 
             if(AudioFiles_NewAudioFile(WAVFile.Filename, &FsFile))
             {
@@ -863,12 +896,16 @@ void StandbyTask(void *argument)
               osThreadSuspend(StandbyHandle); //Terminate this task
             }
 
+            printf("\r\nNew file successfully created in StandbyTask under ALARM_A_SIGNAL case (899)\r\n");
+
             SetNextStopTime(&SwiftSchedule);
 
             SystemFlags.CurrentlyRecording = true;
 
             HAL_MDF_AcqStart_DMA(&MdfHandle0, &MdfFilterConfig0, &DMAConfig);
             HAL_MDF_AcqStart_IT(&MdfHandle1, &MdfFilterConfig1);
+
+            //printf("STANDBY TASK LINE 887\r\n");
 
             //** Start RecordLoopTask ***
             osThreadResume(RecordHandle);
@@ -1026,10 +1063,13 @@ void HallEffectSensorTask(void *argument)
   /* USER CODE BEGIN HallEffectSensor */
   /* Infinite loop */
   EventBits_t uxBits;
+  printf("\r\nInitialized HallEffectSensorTask (1066)\r\n");
 
   for(;;)
   {
   uxBits = xEventGroupWaitBits(xEventGroup, LID_OPEN | LID_CLOSED, pdTRUE, pdFALSE, osWaitForever);
+
+  printf("\r\nLID_OPEN | LID_CLOSED event in HallEffectSensorTask (1072)\r\n");
 
   if(uxBits & LID_OPEN)
   {
@@ -1041,6 +1081,7 @@ void HallEffectSensorTask(void *argument)
     //HAL_GPIO_DeInit(GPIOC, GPIO_PIN_1);
     //HAL_GPIO_DeInit(GPIOA, GPIO_PIN_7);
     //__HAL_RCC_I2C2_CLK_ENABLE();
+    printf("\r\nLID_OPEN event in HallEffectSensorTask (1072)\r\n");
     if(SystemFlags.CurrentlyRecording == true)
       RecordingWithLidOpen();
     else
@@ -1056,6 +1097,7 @@ void HallEffectSensorTask(void *argument)
     }
     else
     {
+      printf("\r\nLID_CLOSED event in HallEffectSensorTask (1072)\r\n");
       SSD1306_OFF();
 
       if(SystemFlags.CurrentlyRecording == true)
@@ -1087,14 +1129,17 @@ void InitializeTask(void *argument)
 {
   /* USER CODE BEGIN Initialize */
   /* Infinite loop */
-  EventBits_t uxBits;
+    EventBits_t uxBits;
     uint8_t InitialScheduleState;
+
+    printf("\r\nInitializeTask initialized (1135)\r\n");
 
     //FRESULT ReturnResult;
     //FIL MyFile;
     /* Infinite loop */
     for(;;)
     {
+      printf("\r\nRunning InitializeTask for loop (1142)\r\n");
       osThreadSuspend(StandbyHandle);
       osThreadSuspend(RecordHandle);
 
@@ -1103,6 +1148,7 @@ void InitializeTask(void *argument)
       {
         SystemFlags.LidClosed = true;
         StandbyWithLidClosed();
+        printf("\r\nLid is closed in InitializeTask (1151)\r\n");
       }
       else
       {
@@ -1114,16 +1160,18 @@ void InitializeTask(void *argument)
         SSD1306_GotoXY (0,0);
         SSD1306_Puts ("Initializing...", &Font_7x10, 1);
         SSD1306_UpdateScreen();
-
+        printf("\r\nLid is open in InitializeTask (1163)\r\n");
         osDelay(700);
       }
       SystemFlags.CurrentlyRecording = false;
 
       //HAL_SD_InitCard(&hsd1);
       SDMMC1_SD_Init();
+      printf("\r\nSDMMC1_SD_Init successful in InitializeTask (1170)\r\n");
 
       if(BSP_SD_Init() == MSD_OK)
       {
+        printf("\r\nBSP_SD_Init successful in InitializeTask (1174)\r\n");
         //HAL_SD_InitCard(&hsd1); //Commented this out on 9/6/2025. Doenst seem to be needed and screws up SDCard interface if called after ejecting SD Card
         AudioFiles_MountSDCard(&SwiftErrors);
 
@@ -1152,6 +1200,8 @@ void InitializeTask(void *argument)
       {
       case 1: //We are in the middle of a record period so go directly into record mode
 
+        printf("\r\nInitializeTask case 1: We are in the middle of a record period (1203)\r\n");
+
         __HAL_RCC_SDMMC1_CLK_ENABLE();
         //** Create new recording directory ***
         if(AudioFiles_NewRecordingDirectory(&WAVFile))
@@ -1173,6 +1223,9 @@ void InitializeTask(void *argument)
           xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
           osThreadTerminate(NULL); //Terminate this task
         }
+
+        printf("\r\nInitializeTask case 1. Files created successfully (1227)\r\n");
+
         WAVFile.DirectoryLevel = 2;
         //** Initialize number of buffer writes per file ***
         BufferWritesPerFile = WAVFile.FileSize;
@@ -1203,6 +1256,8 @@ void InitializeTask(void *argument)
           xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
         }
 
+        printf("\r\nInitializeTask case 1. About to go into RecordTask (1259)\r\n");
+
         HAL_MDF_AcqStart_IT(&MdfHandle1, &MdfFilterConfig1);
 
         //** Blink green LED ***
@@ -1218,6 +1273,7 @@ void InitializeTask(void *argument)
       case 2: // We booted in standby period between record periods. Wait for ALARM_A then start recording
         //** Blink blue LED ***
         //xEventGroupSetBits(xEventGroup, BLU_LED_SIGNAL);
+        printf("\r\nInitializeTask case 2: We are in standby period between record periods (1276)\r\n");
         strcpy(DisplayMessage.Line1, "");
         strcpy(DisplayMessage.Line2, "");
         strcpy(DisplayMessage.Line3, "Standby...");
@@ -1230,100 +1286,106 @@ void InitializeTask(void *argument)
         SystemFlags.CurrentlyRecording = false;
         //** Wait for pushbutton or Alarm A ***
         uxBits = xEventGroupWaitBits(xEventGroup, CENTER_BTN_SIGNAL | ALARM_A_SIGNAL | NEW_VOICE_MEMO_SIGNAL, pdTRUE, pdFALSE, osWaitForever);
-
+        printf("\r\nInitializeTask case 2: CENTER_BTN_SIGNAL | ALARM_A_SIGNAL | NEW_VOICE_MEMO_SIGNAL event occurred (1289)\r\n");
         __HAL_RCC_SDMMC1_CLK_ENABLE();
 
         if(uxBits & (CENTER_BTN_SIGNAL | ALARM_A_SIGNAL))
         {
-        //StatusLED_SolidGreenLED();
-        strcpy(DisplayMessage.Line1, "");
-        strcpy(DisplayMessage.Line2, "");
-        strcpy(DisplayMessage.Line3, "Recording...");
-        strcpy(DisplayMessage.Line4, "");
-        DisplayMessage.LineCount = 4;
-        if(SystemFlags.LidClosed == false)
-        {
-          xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
-          RecordingWithLidOpen();
-        }
-        else
-        {
-          RecordingWithLidClosed();
-        }
+          printf("\r\nInitializeTask case 2: CENTER_BTN_SIGNAL | ALARM_A_SIGNAL event occurred (1294)\r\n");
+          //StatusLED_SolidGreenLED();
+          strcpy(DisplayMessage.Line1, "");
+          strcpy(DisplayMessage.Line2, "");
+          strcpy(DisplayMessage.Line3, "Recording...");
+          strcpy(DisplayMessage.Line4, "");
+          DisplayMessage.LineCount = 4;
+          if(SystemFlags.LidClosed == false)
+          {
+            xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
+            RecordingWithLidOpen();
+          }
+          else
+          {
+            RecordingWithLidClosed();
+          }
 
-        //** Create new recording directory ***
-        if(AudioFiles_NewRecordingDirectory(&WAVFile))
-        {
-          xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
-          osThreadSuspend(InitializeHandle); //Suspend this task
-        }
-        //** Create new day directory ***
-        if(AudioFiles_NewDayDirectory(WAVFile.Filename))
-        {
-          xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
-          //osThreadTerminate(InitScheduleHandle); //Terminate this task
-        }
-        //** Create new audio file ***
-        if(AudioFiles_NewAudioFile(WAVFile.Filename, &FsFile))
-        {
-          xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
-          osThreadSuspend(InitializeHandle); //Suspend this task
-        }
-        //** Initialize number of buffer writes per file ***
-        BufferWritesPerFile = WAVFile.FileSize;
-        if(uxBits & CENTER_BTN_SIGNAL)
-        {
-          SwiftSchedule.EndsAtMidnightFlag = 0;
-          SwiftSchedule.StartsAtMidnightFlag = 1;
-          SwiftSchedule.CurrentRecordNumber = 0;
-          SwiftSchedule.NumberOfRecords = 1;
-          SwiftSchedule.ScheduleType = SCHEDULE_TYPE_CONTINUOUS;
-          SwiftSchedule.StartDate.Year = 0;
-          SwiftSchedule.StartDate.Date = 1;
-          SwiftSchedule.StartDate.Month = 1;
-          SwiftSchedule.StartDate.WeekDay = 1;
-          SwiftSchedule.StopDate.Year = 99;
-          SwiftSchedule.StopDate.Date = 1;
-          SwiftSchedule.StopDate.Month = 1;
-          SwiftSchedule.StopDate.WeekDay = 1;
-          SwiftSchedule.StartStopTimes[0].RecordingStartTime.Hours = 0x00;
-          SwiftSchedule.StartStopTimes[0].RecordingStartTime.Minutes = 0x00;
-          SwiftSchedule.StartStopTimes[0].RecordingStopTime.Hours = 0x23;
-          SwiftSchedule.StartStopTimes[0].RecordingStopTime.Minutes = 0x59;
-          SetNextStopTime(&SwiftSchedule);
-          //RTC_DeactivateAlarm(RTC_ALARM_A); //Deactivate Alarm A
-          RTC_EnableAlarmB();
-        }
-        else//Must be ALARM_A_SIGNAL
-        {
-          //Set next stop time
-          SetNextStopTime(&SwiftSchedule);
-        }
+          //** Create new recording directory ***
+          if(AudioFiles_NewRecordingDirectory(&WAVFile))
+          {
+            xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
+            osThreadSuspend(InitializeHandle); //Suspend this task
+          }
+          //** Create new day directory ***
+          if(AudioFiles_NewDayDirectory(WAVFile.Filename))
+          {
+            xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
+            //osThreadTerminate(InitScheduleHandle); //Terminate this task
+          }
+          //** Create new audio file ***
+          if(AudioFiles_NewAudioFile(WAVFile.Filename, &FsFile))
+          {
+            xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
+            osThreadSuspend(InitializeHandle); //Suspend this task
+          }
+          printf("\r\nInitializeTask case 2: Files created successfully (1329)\r\n");
+          //** Initialize number of buffer writes per file ***
+          BufferWritesPerFile = WAVFile.FileSize;
+          if(uxBits & CENTER_BTN_SIGNAL)
+          {
+            printf("\r\nInitializeTask case 2: CENTER_BTN_SIGNAL occurred (1334)\r\n");
+            SwiftSchedule.EndsAtMidnightFlag = 0;
+            SwiftSchedule.StartsAtMidnightFlag = 1;
+            SwiftSchedule.CurrentRecordNumber = 0;
+            SwiftSchedule.NumberOfRecords = 1;
+            SwiftSchedule.ScheduleType = SCHEDULE_TYPE_CONTINUOUS;
+            SwiftSchedule.StartDate.Year = 0;
+            SwiftSchedule.StartDate.Date = 1;
+            SwiftSchedule.StartDate.Month = 1;
+            SwiftSchedule.StartDate.WeekDay = 1;
+            SwiftSchedule.StopDate.Year = 99;
+            SwiftSchedule.StopDate.Date = 1;
+            SwiftSchedule.StopDate.Month = 1;
+            SwiftSchedule.StopDate.WeekDay = 1;
+            SwiftSchedule.StartStopTimes[0].RecordingStartTime.Hours = 0x00;
+            SwiftSchedule.StartStopTimes[0].RecordingStartTime.Minutes = 0x00;
+            SwiftSchedule.StartStopTimes[0].RecordingStopTime.Hours = 0x23;
+            SwiftSchedule.StartStopTimes[0].RecordingStopTime.Minutes = 0x59;
+            SetNextStopTime(&SwiftSchedule);
+            //RTC_DeactivateAlarm(RTC_ALARM_A); //Deactivate Alarm A
+            RTC_EnableAlarmB();
+          }
+          else//Must be ALARM_A_SIGNAL
+          {
+            printf("\r\nInitializeTask case 2: ALARM_A_SIGNAL occurred (1358)\r\n");
+            //Set next stop time
+            SetNextStopTime(&SwiftSchedule);
+          }
 
-        SystemFlags.CurrentlyRecording = true;
+          SystemFlags.CurrentlyRecording = true;
 
-        //InitializeCodecAndDMA();
-        //ReInit_MDF1_Interface();
+          //InitializeCodecAndDMA();
+          //ReInit_MDF1_Interface();
+          printf("\r\nInitializeTask case 2: About to go into RecordTask (1367)\r\n");
 
-        HAL_MDF_AcqStart_DMA(&MdfHandle0, &MdfFilterConfig0, &DMAConfig);
+          HAL_MDF_AcqStart_DMA(&MdfHandle0, &MdfFilterConfig0, &DMAConfig);
 
-        HAL_MDF_AcqStart_IT(&MdfHandle1, &MdfFilterConfig1);
+          HAL_MDF_AcqStart_IT(&MdfHandle1, &MdfFilterConfig1);
 
-        //** Blink green led ***
-        //xEventGroupSetBits(xEventGroup, GRN_LED_SIGNAL);
+          //** Blink green led ***
+          //xEventGroupSetBits(xEventGroup, GRN_LED_SIGNAL);
 
-        //** Start RecordLoopTask ***
-        osThreadResume(RecordHandle);
+          //** Start RecordLoopTask ***
+          osThreadResume(RecordHandle);
         }
         else //This must be NEW_VOICE_MEMO_SIGNAL
         {
-        //VoiceMemoHandle = osThreadNew(NewVoiceMemoTask, NULL, &VoiceMemo_attributes);
+          //VoiceMemoHandle = osThreadNew(NewVoiceMemoTask, NULL, &VoiceMemo_attributes);
         }
 
         osThreadSuspend(InitializeHandle); //Suspend this task
         break;
 
       default:
+        printf("\r\nInitializeTask default case: Set recorder up for standby mode (1388)\r\n");
         //** Blink blue LED ***
         strcpy(DisplayMessage.Line1, "");
         strcpy(DisplayMessage.Line2, "");
@@ -1351,6 +1413,7 @@ void InitializeTask(void *argument)
 
         //HAL_I2C_MspDeInit(&hi2c1);
         //** Start standby thread ***
+        printf("\r\nInitializeTask default case: Go to StandbyTask (1416)\r\n");
         osThreadResume(StandbyHandle);
         //osThreadTerminate(NULL); //Terminate this task
         osThreadSuspend(InitializeHandle);
@@ -1358,6 +1421,8 @@ void InitializeTask(void *argument)
       }
       else
       {
+        printf("\r\nInitializeTask SD Card Error (1424)\r\n");
+
         HAL_SD_DeInit(&hsd1);
 
         strcpy(DisplayMessage.Line1, "SD Card Error");

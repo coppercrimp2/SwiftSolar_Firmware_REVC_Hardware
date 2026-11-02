@@ -51,8 +51,8 @@ void RTC_Init(void)
   {
 	//HAL_PWREx_EnableBkupRAMRetention();
     //HAL_RTC_Init(&hrtc);
-    sTime.Hours = 22;
-    sTime.Minutes = 40;
+    sTime.Hours = 0x23;
+    sTime.Minutes = 0x53;
     sTime.Seconds = 0;
     sTime.SubSeconds = 0;
     sTime.TimeFormat = RTC_HOURFORMAT12_AM;
@@ -63,7 +63,7 @@ void RTC_Init(void)
     sDate.WeekDay = RTC_WEEKDAY_SATURDAY;
     sDate.Month = RTC_MONTH_APRIL;
     sDate.Date = 0x19;
-    sDate.Year = 0x25;
+    sDate.Year = 0x27;
 
     HAL_RTC_SetDate(&hrtc, &sDate, FORMAT_BCD);
 
@@ -768,6 +768,21 @@ void RTC_ReturnDateTimeFileName(char *buff)
   now.tm_isdst = sTime.DayLightSaving;
 
   strftime(buff, 20, "%Y%m%d_%H%M%S.wav", &now);
+}
+
+void RTC_ReturnTimeString(char *buff)
+{
+  RTC_TimeTypeDef sTime;
+
+  struct tm now;
+
+  HAL_RTC_GetTime(&hrtc, &sTime, FORMAT_BIN);
+
+  now.tm_hour = sTime.Hours;
+  now.tm_min = sTime.Minutes;
+  now.tm_sec = sTime.Seconds;
+
+  strftime(buff, 8, "%H:%M:%S", &now);
 }
 
 void RTC_ReturnDateString(char *buff)
