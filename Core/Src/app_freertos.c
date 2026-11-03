@@ -881,10 +881,12 @@ void StandbyTask(void *argument)
             if(SystemFlags.LidClosed == false)
             {
               RecordingWithLidOpen();
+              printf("\r\nRecordingWithLidOpen function call in StandbyTask (884)\r\n");
             }
             else
             {
               RecordingWithLidClosed();
+              printf("\r\nRecordingWithLidClosed function call in StandbyTask (884)\r\n");
             }
 
             //osDelay(50);
@@ -892,11 +894,12 @@ void StandbyTask(void *argument)
 
             if(AudioFiles_NewAudioFile(WAVFile.Filename, &FsFile))
             {
+              printf("\r\nError creating new audio file (897)\r\n");
               xEventGroupSetBits(xEventGroup, ERROR_SIGNAL);
               osThreadSuspend(StandbyHandle); //Terminate this task
             }
 
-            printf("\r\nNew file successfully created in StandbyTask under ALARM_A_SIGNAL case (899)\r\n");
+            printf("\r\nNew file successfully created in StandbyTask under ALARM_A_SIGNAL case (902)\r\n");
 
             SetNextStopTime(&SwiftSchedule);
 
@@ -1461,15 +1464,20 @@ void ScanButtonsTask(void *argument)
     /* Infinite loop */
     //TickType_t last_wake_time;
     //const TickType_t sample_interval = 20/portTICK_PERIOD_MS;
+    //UBaseType_t uxHighWaterMark = 0;
+    //char strHighWaterMark[4];
+    char strFullString[256];
 
-    uint16_t centerButtonPastState, sdCardSwitchPastState;
-    uint16_t centerButtonCurrentState, sdCardSwitchCurrentState;
+    uint16_t centerButtonPastState, sdCardSwitchPastState, memoButtonPastState;
+    uint16_t centerButtonCurrentState, sdCardSwitchCurrentState, memoButtonCurrentState;
 
     uint8_t centerButtonCounter = 0;
     uint8_t sdCardSwitchCounter = 0; //sdCardSwitch
+    uint8_t memoButtonCounter = 0;
 
     centerButtonPastState = HAL_GPIO_ReadPin(BTN_ENTER_GPIO_Port,BTN_ENTER_Pin);
     sdCardSwitchPastState = HAL_GPIO_ReadPin(SDCARD_DETECT_GPIO_Port,SDCARD_DETECT_Pin);
+    memoButtonPastState = HAL_GPIO_ReadPin(BTN_MEMO_GPIO_Port,BTN_MEMO_Pin);
 
     //last_wake_time = xTaskGetTickCount();
 
@@ -1480,6 +1488,7 @@ void ScanButtonsTask(void *argument)
 
       centerButtonCurrentState = HAL_GPIO_ReadPin(BTN_ENTER_GPIO_Port,BTN_ENTER_Pin);
       sdCardSwitchCurrentState = HAL_GPIO_ReadPin(SDCARD_DETECT_GPIO_Port,SDCARD_DETECT_Pin);
+      memoButtonCurrentState = HAL_GPIO_ReadPin(BTN_MEMO_GPIO_Port,BTN_MEMO_Pin);
 
       if(centerButtonCurrentState == centerButtonPastState)
       {
@@ -1542,6 +1551,44 @@ void ScanButtonsTask(void *argument)
             xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
           }
 
+          //xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
+        }
+      }
+
+      if(memoButtonCurrentState == memoButtonPastState)
+      {
+        memoButtonCounter = 0;
+      }
+      else
+      {
+        memoButtonCounter++;
+        if(memoButtonCounter == 8)
+        {
+          memoButtonPastState = memoButtonCurrentState;
+          if(memoButtonCurrentState == 0)
+          {
+            printf("\r\n\r\n\r\n");
+            vTaskList(strFullString);
+            printf(strFullString);
+            /*
+            strcpy(strFullString, "\r\nREC: ");
+            uxHighWaterMark = uxTaskGetStackHighWaterMark( RecordHandle );
+            sprintf(strHighWaterMark, "%d", (int)uxHighWaterMark);
+            strcat(strFullString, strHighWaterMark);
+            printf(strFullString);
+
+            strcpy(strFullString, "\r\nSTBY: ");
+            uxHighWaterMark = uxTaskGetStackHighWaterMark( StandbyHandle );
+            sprintf(strHighWaterMark, "%d", (int)uxHighWaterMark);
+            strcat(strFullString, strHighWaterMark);
+            printf(strFullString);
+
+            strcpy(strFullString, "\r\nINIT: ");
+            uxHighWaterMark = uxTaskGetStackHighWaterMark( InitializeHandle );
+            sprintf(strHighWaterMark, "%d", (int)uxHighWaterMark);
+            strcat(strFullString, strHighWaterMark);
+            printf(strFullString);*/
+          }
           //xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
         }
       }
