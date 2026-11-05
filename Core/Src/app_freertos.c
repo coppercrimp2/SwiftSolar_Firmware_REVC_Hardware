@@ -874,19 +874,22 @@ void StandbyTask(void *argument)
             {
               xQueueSend(QueueDisplayMessageHandle, ( void * ) &DisplayMessage, osWaitForever);
             }
+            printf("\r\nAbout to call __HAL_RCC_SDMMC1_CLK_ENABLE (877)\r\n");
 
             __HAL_RCC_SDMMC1_CLK_ENABLE();
+
+            printf("\r\nFinished calling __HAL_RCC_SDMMC1_CLK_ENABLE (881)\r\n");
 
             BufferWritesPerFile = WAVFile.FileSize;
             if(SystemFlags.LidClosed == false)
             {
               RecordingWithLidOpen();
-              printf("\r\nRecordingWithLidOpen function call in StandbyTask (884)\r\n");
+              printf("\r\nRecordingWithLidOpen function call in StandbyTask (887)\r\n");
             }
             else
             {
               RecordingWithLidClosed();
-              printf("\r\nRecordingWithLidClosed function call in StandbyTask (884)\r\n");
+              printf("\r\nRecordingWithLidClosed function call in StandbyTask (892)\r\n");
             }
 
             //osDelay(50);

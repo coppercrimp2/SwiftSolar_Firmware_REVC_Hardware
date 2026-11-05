@@ -229,6 +229,7 @@ int main(void)
 
   RTC_Init();
 
+  HAL_UART_Transmit(&huart1, (uint8_t *)"\r\nRTC Init successfull\r\n", 17, 0xFFFF);
   /* USER CODE BEGIN 2 */
 
   //HAL_GPIO_WritePin(PWR_3p3V_Enable_GPIO_Port, PWR_3p3V_Enable_Pin, GPIO_PIN_SET); //3.3V Enable
