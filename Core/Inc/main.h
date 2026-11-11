@@ -58,7 +58,7 @@ void SystemClock_Config(void);
 typedef struct Message {
   char Line1[20];
   char Line2[20];
-  char Line3[20];
+  char Line3[30];
   char Line4[20];
   char Line5[20];
   int LineCount;

@@ -140,7 +140,7 @@ uint8_t AudioFiles_NewDayDirectory(uint8_t* CustomLabel)
   strcpy(DirectoryName, (char*) CustomLabel);
     
   RTC_ReturnDateString(temp);
-  strcat(DirectoryName, temp);  
+  strcat(DirectoryName, temp);
   
   //Check to see if directory has already been created
   ReturnResult = f_stat(DirectoryName, &FileInfo);      
@@ -272,7 +272,7 @@ uint8_t AudioFiles_WriteHeader(SWIFT_ERRORS* SwiftError, FIL* MyFile)
   //volatile uint8_t SampleRateByte;
   //volatile uint32_t SampleRateWord;
 
-  uint8_t WAVFileHeader[44] = {
+  uint8_t WAVFileHeader[] = {
       // ChunkID: "RIFF"
       0x52, 0x49, 0x46, 0x46,
       // ChunkSize: 199992 (file size - 8)
@@ -298,7 +298,8 @@ uint8_t AudioFiles_WriteHeader(SWIFT_ERRORS* SwiftError, FIL* MyFile)
       // Subchunk2ID: "data"
       0x64, 0x61, 0x74, 0x61,
       // Subchunk2Size: 199956
-      0xD4, 0x07, 0x03, 0x00
+      0xD4, 0x07, 0x03, 0x00,
+      0x00,0x00
   };
   
   SwiftError->CallingFunction = FUNC_AudioFiles_WriteHeader;
@@ -340,7 +341,7 @@ uint8_t AudioFiles_WriteHeader(SWIFT_ERRORS* SwiftError, FIL* MyFile)
     return 1; //ERROR
   }  
 
-  SwiftError->FatFsResult = f_write(MyFile, WAVFileHeader, 44, &bw);
+  SwiftError->FatFsResult = f_write(MyFile, WAVFileHeader, 46, &bw);
   if (SwiftError->FatFsResult != FR_OK) 
   {
     SwiftError->ErrorNumber = 3;

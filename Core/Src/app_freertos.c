@@ -61,7 +61,7 @@
 #define NEW_VOICE_MEMO_SIGNAL     ( 1 << 12 )
 #define LOW_BATTERY_SIGNAL        ( 1 << 13 )
 
-#define REC_BUFF_SIZE        (32764)
+#define REC_BUFF_SIZE        (16384)//(32764)
 #define REC_BUFF_SIZE_DIV2   (REC_BUFF_SIZE / 2)
 
 #define BTN_PRESSED (0)
@@ -164,7 +164,7 @@ struct system_flags{
 
 struct system_flags SystemFlags;
 
-static int16_t RecBuff[REC_BUFF_SIZE] = {0};
+static int16_t RecBuff[REC_BUFF_SIZE] = {0}; //Lives in .BSS / RAM
 __IO uint32_t  DmaRecHalfBuffCplt  = 0;
 __IO uint32_t  DmaRecBuffCplt      = 0;
 
