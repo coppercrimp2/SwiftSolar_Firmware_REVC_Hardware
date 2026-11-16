@@ -53,28 +53,28 @@ extern "C" {
 /* Exported macro -------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 /* USER CODE END EM */
+extern osThreadId_t defaultTaskHandle;
 extern osThreadId_t RecordHandle;
-extern osThreadId_t StandbyHandle;
-extern osThreadId_t ErrorHandle;
 extern osThreadId_t DisplayUpdateHandle;
-extern osThreadId_t HallEffectSensorHandle;
 extern osThreadId_t InitializeHandle;
-extern osThreadId_t ScanButtonsHandle;
+extern osThreadId_t SchedulerHandle;
 extern osMessageQueueId_t QueueDisplayMessageHandle;
+extern osMessageQueueId_t QueueRecordMessageHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-
+typedef struct Record_Task_Message {
+  char FilePath[20];
+  char FileName[20];
+  bool StartOrStopRecording;
+}Record_Task_Message;
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
 void RecordTask(void *argument);
-void StandbyTask(void *argument);
-void ErrorTask(void *argument);
 void DisplayUpdateTask(void *argument);
-void HallEffectSensorTask(void *argument);
 void InitializeTask(void *argument);
-void ScanButtonsTask(void *argument);
+void SchedulerTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

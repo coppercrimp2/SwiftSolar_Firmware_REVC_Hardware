@@ -70,6 +70,7 @@ extern DMA_QListTypeDef MDFQueue;
 /* Private defines -----------------------------------------------------------*/
 #define HallSensor_Pin GPIO_PIN_1
 #define HallSensor_GPIO_Port GPIOA
+#define HallSensor_EXTI_IRQn EXTI1_IRQn
 #define OLED_13V_EN_Pin GPIO_PIN_0
 #define OLED_13V_EN_GPIO_Port GPIOB
 #define BTN_INT_Pin GPIO_PIN_15
@@ -112,8 +113,6 @@ extern DMA_QListTypeDef MDFQueue;
 //#define REC_BUFF_SIZE        (32764)//(16382)//(2048U)//(1024U)
 //#define REC_BUFF_SIZE_DIV2  (REC_BUFF_SIZE / 2)
 /* USER CODE END Private defines */
-
-
 
 #ifdef __cplusplus
 }

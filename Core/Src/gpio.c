@@ -57,12 +57,8 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
-  HAL_GPIO_WritePin(GPIOB, OLED_13V_EN_Pin, GPIO_PIN_RESET); //13V is off
-  HAL_GPIO_WritePin(GPIOB, SDCard_En_Pin, GPIO_PIN_RESET); //SDCard_En is off
-  HAL_GPIO_WritePin(GPIOB, SDCARD_PWR_EN_Pin, GPIO_PIN_SET); //SDCard Power Off
-
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, OLED_CS_Pin|OLED_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, OLED_13V_EN_Pin|SDCard_En_Pin|SDCARD_PWR_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, BTN_PSHOLD_Pin|OLED_CS_Pin|OLED_RST_Pin, GPIO_PIN_RESET);
@@ -95,11 +91,11 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : HallSensor_Pin */
-  GPIO_InitStruct.Pin = HallSensor_Pin;
+  /*Configure GPIO pins : HallSensor_Pin USB_VBUS_Pin */
+  GPIO_InitStruct.Pin = HallSensor_Pin|USB_VBUS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(HallSensor_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -171,12 +167,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BTN_MEMO_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : USB_VBUS_Pin */
-  GPIO_InitStruct.Pin = USB_VBUS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USB_VBUS_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : PD0 PD1 PD3 PD7 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
@@ -190,12 +180,14 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI9_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_IRQn);
-
   HAL_NVIC_SetPriority(EXTI1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
+  HAL_NVIC_SetPriority(EXTI9_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_IRQn);
+
 }
+
+/* USER CODE BEGIN 2 */
 
 /* USER CODE END 2 */
